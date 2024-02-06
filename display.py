@@ -14,13 +14,15 @@ model = tf.keras.models.load_model("my_model.keras")
 pygame.init()
 
 # Constants
-SCREEN_WIDTH = 400
+SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 400
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (100, 200, 100)
-RED = (200, 100, 100)
+BUTTON_COLOR = (150, 150, 150)
 BUTTON_TEXT_COLOR = BLACK
+NUMBER_COLOR = (70, 70, 70)  # Color for the numbers
+CIRCLE_RADIUS = 10
+CIRCLE_GAP = 20
 
 # Select a random image from the test set
 idx = np.random.randint(0, test_images.shape[0])
@@ -33,7 +35,6 @@ img = np.expand_dims(img, axis=0)
 # Make a prediction with the loaded model
 predictions = model.predict(img)
 predicted_label = np.argmax(predictions)
-confidence = predictions[0][predicted_label]
 
 # Initialize the display
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -41,18 +42,17 @@ pygame.display.set_caption("MNIST Prediction")
 
 # Function to generate a random digit and update information
 def generate_random_digit():
-    global idx, img, true_label, predicted_label, confidence
+    global idx, img, true_label, predicted_label
     idx = np.random.randint(0, test_images.shape[0])
     img = test_images[idx]
     true_label = test_labels[idx]
     img = np.expand_dims(img, axis=0)
     predictions = model.predict(img)
     predicted_label = np.argmax(predictions)
-    confidence = predictions[0][predicted_label]
 
 # Function to generate a random incorrectly guessed digit and update information
 def generate_incorrectly_guessed_digit():
-    global idx, img, true_label, predicted_label, confidence
+    global idx, img, true_label, predicted_label
     incorrect_indices = np.where(test_labels != np.argmax(model.predict(test_images), axis=1))[0]
     if len(incorrect_indices) > 0:
         idx = np.random.choice(incorrect_indices)
@@ -61,7 +61,6 @@ def generate_incorrectly_guessed_digit():
         img = np.expand_dims(img, axis=0)
         predictions = model.predict(img)
         predicted_label = np.argmax(predictions)
-        confidence = predictions[0][predicted_label]
 
 # Main loop
 running = True
@@ -85,19 +84,28 @@ while running:
     screen.blit(img_surface, (60, 20))  # Center the image
 
     # Draw the buttons
-    pygame.draw.rect(screen, GREEN, (160, 320, 80, 40))  # New Digit button position adjusted, Soft green color
-    pygame.draw.rect(screen, RED, (250, 320, 80, 40))  # Incorrect button position adjusted, Soft red color
+    pygame.draw.rect(screen, BUTTON_COLOR, (160, 320, 80, 40))  # New Digit button position adjusted
+    pygame.draw.rect(screen, BUTTON_COLOR, (250, 320, 80, 40))  # Incorrect button position adjusted
     font = pygame.font.Font(None, 24)
     button_text = font.render("New Digit", True, BUTTON_TEXT_COLOR)
     screen.blit(button_text, (163, 332))  # New Digit button text position adjusted
     button_text = font.render("Incorrect", True, BUTTON_TEXT_COLOR)
     screen.blit(button_text, (255, 332))  # Incorrect button text position adjusted
 
-    font = pygame.font.Font(None, 24)
-    true_label_text = font.render(f"True Label: {true_label}", True, BLACK)
-    predicted_label_text = font.render(f"Predicted Label: {predicted_label}, Confidence: {confidence:.2f}", True, BLACK)
-    screen.blit(true_label_text, (10, 350))
-    screen.blit(predicted_label_text, (10, 380))
+    # Draw the numbers and circles
+    for i in range(10):
+        number_text = font.render(str(i), True, NUMBER_COLOR)
+        screen.blit(number_text, (400, 20 + i * 30))  # Adjust the vertical position of the numbers
+
+        # Generate unique colors for the circles
+        circle_color = ((i * 20) % 256, (i * 30) % 256, (i * 40) % 256)
+        pygame.draw.circle(screen, circle_color, (470, 25 + i * 30), CIRCLE_RADIUS)  # Adjust the vertical position of the circles
+
+    # Display true and guessed labels
+    true_label_text = font.render(f"True Value: {true_label}", True, BLACK)
+    predicted_label_text = font.render(f"Guessed Value: {predicted_label}", True, BLACK)
+    screen.blit(true_label_text, (400, 320))
+    screen.blit(predicted_label_text, (400, 350))
 
     pygame.display.flip()
 
