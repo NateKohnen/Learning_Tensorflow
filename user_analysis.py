@@ -13,7 +13,7 @@ pygame.init()
 # Set up the display
 width, height = 280, 280
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Simple Drawing App")
+pygame.display.set_caption("Illustration Pad")
 
 # Colors
 black = (0, 0, 0)
@@ -22,7 +22,7 @@ white = (255, 255, 255)
 # Drawing variables
 drawing = False
 last_pos = (0, 0)
-radius = 5
+radius = 8
 
 # Analyze the drawn image
 def analyze_image():
@@ -34,6 +34,9 @@ def analyze_image():
 
     # Resize the image to 28x28 pixels
     drawn_image = drawn_image.resize((28, 28))
+
+    # Save the version of the image that will be fed to the model
+    drawn_image.save("modified_image.png")
 
     # Convert to a NumPy array
     image_data = np.array(drawn_image)
@@ -71,6 +74,9 @@ while True:
             elif event.key == pygame.K_a:
                 # Analyze the drawn image using the model
                 analyze_image()
+            elif event.key == pygame.K_d:
+                # Analyze the drawn image using the model
+                screen.fill(black)
 
     # Update the display
     pygame.display.flip()
