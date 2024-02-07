@@ -2,6 +2,10 @@ import pygame
 import sys
 import numpy as np
 from PIL import Image
+import tensorflow as tf
+
+# Load the saved model
+model = tf.keras.models.load_model("my_model.keras")
 
 # Initialize Pygame
 pygame.init()
@@ -20,6 +24,31 @@ drawing = False
 last_pos = (0, 0)
 radius = 5
 
+# Function to analyze the drawn image using the model
+def analyze_image():
+    # Load the drawn image
+    drawn_image = Image.open("drawn_image.png")
+
+    # Convert to grayscale
+    drawn_image = drawn_image.convert("L")
+
+    # Resize the image to 28x28 pixels
+    drawn_image = drawn_image.resize((28, 28))
+
+    # Convert to a NumPy array
+    image_data = np.array(drawn_image)
+
+    # Reshape and preprocess the image for model input
+    img = image_data.reshape(1, 28, 28) / 255.0
+
+    # Make predictions using the model
+    predictions = model.predict(img)
+    predicted_label = np.argmax(predictions)
+
+    # Print the predicted label and confidence values
+    print("Predicted Label:", predicted_label)
+    print("Confidence Values:", predictions)
+
 # Main game loop
 while True:
     for event in pygame.event.get():
@@ -34,34 +63,17 @@ while True:
         elif event.type == pygame.MOUSEMOTION and drawing:
             pygame.draw.line(screen, white, last_pos, event.pos, radius * 2)
             last_pos = event.pos
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                # Save the drawn image
+                pygame.image.save(screen, "drawn_image.png")
+                print("Image saved.")
+            elif event.key == pygame.K_a:
+                # Analyze the drawn image using the model
+                analyze_image()
 
     # Update the display
     pygame.display.flip()
 
     # Limit frames per second
     pygame.time.Clock().tick(60)
-
-    # Save the drawn image when 's' key is pressed
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_s]:
-        # Capture the screen and convert it to a NumPy array
-        image_data = pygame.surfarray.array3d(screen)
-        image_data = np.flip(image_data, axis=0)  # Flip vertically
-
-        # Convert to grayscale
-        image_data = np.dot(image_data[..., :3], [0.299, 0.587, 0.114])
-
-        # Convert to a PIL Image
-        pil_image = Image.fromarray(image_data.astype(np.uint8))
-
-        # Resize the image to 28x28 pixels
-        pil_image = pil_image.resize((28, 28))
-
-        # Save the image as a PNG file
-        pil_image.save("drawn_image.png")
-
-        # Rotate the saved image by 270 degrees
-        rotated_image = pil_image.rotate(270)
-
-        # Save the rotated image
-        rotated_image.save("drawn_image_rotated.png")
