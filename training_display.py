@@ -20,7 +20,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BUTTON_COLOR = (150, 150, 150)
 BUTTON_TEXT_COLOR = BLACK
-NUMBER_COLOR = (70, 70, 70)  # Color for the numbers
+NUMBER_COLOR = (70, 70, 70)
 
 # Select a random image from the test set
 idx = np.random.randint(0, test_images.shape[0])
@@ -39,7 +39,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("MNIST Prediction")
 
 
-# Function to generate a random digit and update information
+# Function to generate a random digit and update displayed information
 def generate_random_digit():
     global idx, img, true_label, predicted_label, predictions
     idx = np.random.randint(0, test_images.shape[0])
@@ -50,7 +50,7 @@ def generate_random_digit():
     predicted_label = np.argmax(predictions)
 
 
-# Function to generate a random incorrectly guessed digit and update information
+# Function to generate a random incorrectly guessed digit and update displayed information
 def generate_incorrectly_guessed_digit():
     global idx, img, true_label, predicted_label, predictions
     incorrect_indices = np.where(test_labels != np.argmax(model.predict(test_images), axis=1))[0]
@@ -70,38 +70,38 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Check if the mouse click is within the buttons area
+            # Check if the mouse click is within the button's area
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            if 160 <= mouse_x <= 240 and 320 <= mouse_y <= 360:  # New Digit button position adjusted
+            if 160 <= mouse_x <= 240 and 320 <= mouse_y <= 360:  # 'New Digit' button click detection
                 generate_random_digit()
-            elif 250 <= mouse_x <= 330 and 320 <= mouse_y <= 360:  # Incorrect button position adjusted
+            elif 250 <= mouse_x <= 330 and 320 <= mouse_y <= 360:  # 'Incorrect' button click detection
                 generate_incorrectly_guessed_digit()
 
     # Display the image and predictions
     screen.fill(WHITE)
     img_surface = pygame.surfarray.make_surface(
-        np.stack((np.rot90(np.flipud(img[0]), k=-1) * 255,) * 3, axis=-1))  # Flip and rotate, then convert to color
+        np.stack((np.rot90(np.flipud(img[0]), k=-1) * 255,) * 3, axis=-1))  # Flip and rotate the image
     img_surface = pygame.transform.scale(img_surface, (280, 280))  # Scale up the image
     screen.blit(img_surface, (60, 20))  # Center the image
 
     # Draw the buttons
-    pygame.draw.rect(screen, BUTTON_COLOR, (160, 320, 80, 40))  # New Digit button position adjusted
-    pygame.draw.rect(screen, BUTTON_COLOR, (250, 320, 80, 40))  # Incorrect button position adjusted
+    pygame.draw.rect(screen, BUTTON_COLOR, (160, 320, 80, 40))  # New Digit button position
+    pygame.draw.rect(screen, BUTTON_COLOR, (250, 320, 80, 40))  # Incorrect button position
     font = pygame.font.Font(None, 24)
     button_text = font.render("New Digit", True, BUTTON_TEXT_COLOR)
-    screen.blit(button_text, (163, 332))  # New Digit button text position adjusted
+    screen.blit(button_text, (163, 332))  # 'New Digit' button text
     button_text = font.render("Incorrect", True, BUTTON_TEXT_COLOR)
-    screen.blit(button_text, (255, 332))  # Incorrect button text position adjusted
+    screen.blit(button_text, (255, 332))  # 'Incorrect' button text
 
     # Draw the numbers and confidence values
     for i in range(10):
         number_text = font.render(str(i), True, NUMBER_COLOR)
-        screen.blit(number_text, (400, 20 + i * 30))  # Adjust the vertical position of the numbers
+        screen.blit(number_text, (400, 20 + i * 30))
 
         # Get confidence value for the current digit
         confidence = predictions[0][i]
 
-        # Convert confidence value to percentage and round to two decimals
+        # Convert confidence value to a readable percentage
         confidence_percentage = f"{confidence * 100:.2f}%"
 
         # Render confidence value text

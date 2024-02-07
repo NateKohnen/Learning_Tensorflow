@@ -10,21 +10,21 @@ model = tf.keras.models.load_model("my_model.keras")
 # Initialize Pygame
 pygame.init()
 
-# Set up the screen
+# Set up the display
 width, height = 280, 280
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Simple Drawing App")
 
-# Set up colors
+# Colors
 black = (0, 0, 0)
 white = (255, 255, 255)
 
-# Set up drawing variables
+# Drawing variables
 drawing = False
 last_pos = (0, 0)
 radius = 5
 
-# Function to analyze the drawn image using the model
+# Analyze the drawn image
 def analyze_image():
     # Load the drawn image
     drawn_image = Image.open("drawn_image.png")
